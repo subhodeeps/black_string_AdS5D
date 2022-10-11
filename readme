@@ -1,0 +1,14 @@
+PAMR:
+=====
+
+> cd ../pamr
+> ./configure --prefix=/home/{username}
+> make install
+
+
+AdS4D:
+=====
+
+> cd ../AdS4D
+> ./configure --prefix=/home/{username}
+> make install

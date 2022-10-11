@@ -1,0 +1,63 @@
+.IGNORE:
+
+SHELL = /bin/sh
+
+# PATHS
+
+prefix  = @prefix@
+
+BBH_SYSTEM = @BBH_SYSTEM@
+
+CC     = @CC@
+AR     = @AR@
+RANLIB = @RANLIB@
+
+LIBS       = -lpamr $(MPILIB) @LIBS@ @CCF77LIBS@ 
+LDFLAGS    = @LDFLAGS@ -L. @APP_LIB_PATHS@
+CPPFLAGS   = -I. @CPPFLAGS@ -I$(prefix)/include @APP_INCLUDE_PATHS@
+CFLAGS     = @CFLAGS@ 
+DEFS       = @DEFS@ @BBH_DEFS@
+
+CTOF     = mfi
+PERL     = @PERL@ 
+
+F77      = @F77@
+F77FLAGS = @F77FLAGS@
+
+CC_COMP    = $(CC) -c $(CFLAGS) $(CPPFLAGS)
+CC_LOAD    = $(CC) $(CFLAGS) $(LDFLAGS) 
+
+F77_COMP   = $(F77) $(F77FLAGS) 
+F77_LOAD   = $(F77) $(F77FLAGS) $(F77_LDFLAGS) $(LDFLAGS) 
+
+F77_TRANSFORM = touch
+
+AUX = src
+
+# targets
+
+all: 
+	echo; echo "Making in $(AUX)"
+	for f in $(AUX); do \
+		(cd $$f; make) \
+	done
+
+install: all
+	for f in $(SRC); do \
+		(cd $$f; make install) \
+	done
+
+clean:
+	echo; echo "Cleaning up"
+	for f in $(AUX); do \
+		(cd $$f; make clean) \
+	done
+	(cd bin; rm $(EXECUTABLES) > /dev/null 2>&1) 
+	(cd lib; rm *.a) > /dev/null 2>&1) 
+	rm $(EXECUTABLES) > /dev/null 2>&1
+	rm *_.c > /dev/null 2>&1 
+	rm *.o > /dev/null 2>&1
+	rm *~ > /dev/null
+	rm *.sdf > /dev/null 2>&1
+	rm config.cache config.log config.status > /dev/null 2>&1
+	rm Makefile > /dev/null 2>&1

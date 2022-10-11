@@ -1,0 +1,36 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(Makefile.in)
+
+DEFAULT_RNPL_FLIBS='-lrnpl -lxvs'
+if test "X$RNPL_FLIBS" = "X"; then
+	echo "+++ WARNING: Environment variable RNPL_FLIBS is not set."
+	echo "+++ Setting to default value '$DEFAULT_RNPL_FLIBS'"
+	RNPL_FLIBS=$DEFAULT_RNPL_FLIBS
+	AC_SUBST(RNPL_FLIBS)
+fi
+
+dnl Determine system type
+BBH_SYS_GETSYSTEM
+
+dnl Checks for programs
+AC_PROG_CC
+AC_CHECK_PROG(PERL,perl,perl,no)
+AC_CHECK_PROG(RANLIB,ranlib,ranlib,touch)
+AC_CHECK_PROG(AR,ar,ar,touch)
+
+BBH_F77_CONFIGURE
+
+AC_CHECK_LIB(mpi, MPI_Comm_rank)
+AC_CHECK_LIB(m, sin)
+AC_CHECK_HEADER(mpi.h)
+BBH_CHECK_HEADERS("pamr.h bbhutil.h",
+                  "$INCLUDE_PATHS /usr/local/include",
+                   APP_INCLUDE_PATHS,yes) 
+BBH_LOCATE_HEADER("amrd.h","$INCLUDE_PATHS /usr/local/include",
+                   AMRDH,yes)
+BBH_CHECK_LIBS("pamr amrd bbhutil xvs",
+               "$LIB_PATHS /usr/lib64 /usr/lib /usr/local/lib",
+               APP_LIB_PATHS,LIBS,yes)
+AC_SUBST(BBH_DEFS)
+
+AC_OUTPUT(Makefile src/Makefile)

@@ -1,0 +1,27 @@
+STATUS OF THIS BRANCH:
+2+1 Cartesian code for study of instability of black string in AdS5D. The first version is taken from the LR_ID_norms_BHphiquants branch of the stability_KerrAdS code.
+
+NOTE: the option of solving the constraints is not implemented. Set skip_constraints=0 to skip the Hamiltonian constraint solver.
+(* 
+Notes from the Kerr_AdS4D code (the one used to study superradiance). The following features are not fully implemented because not needed at the moment, but have been implemented in a very similar code so they can be added to this one easily.
+Implemented spherical harmonics perturbations with l=2,m=2 that follow the ones used in arXiv:1801.09711 (Chesler,Lowe). Adding these to initial data makes the data violate the constraints, so only small perturbations can be used and one needs to check that the constraint-damping terms take the evolution back to a solution of the Einstein equations.
+Implemented the possibility of adding these perturbations at later times during the evolution.
+*)
+Implemented the calculation of the densities of the norms defined in arxiv:1103.0710v2 and used in arxiv:1110.6794v2, both for fixed background (Kerr-AdS) and for the case with backreaction.
+Implemented the addition of boosted Gaussian scalar field lumps to initial data.
+Implemented the option of substituting (instead of adding) the initial scalar field profile with a Lorentz-boosted one.
+
+Implemented the calculation and output of Generalised Harmonic constraints.
+
+Implemented AH-shaped excision and spherical excision with radius given by the minimum of the AH radius (times (1-ex_rbuf)).
+
+It is possible to deactivate the AH finder and have fixed excision radius by just setting a value for ex_rbuf or to use the AH finder for scalar field and analytic BH initial data.
+We've implemented the possibility of producing sdf files with the values of the metric components on the apparent horizon.
+
+We implemented the possibility of producing an ascii file with the value of the kretschmann scalar at the centre of the grid at the corresponding time of evolution. We have also implemented the possibility of outputting the Kretschmann and Riemann cube scalars in the bulk as sdf files. We have also implemented the possibility of outputting the Kretschmann scalar and Riemann cube scalar at the AH, both in sdf and ascii form.
+
+We implemented first and second order boundary extrapolation along the radial direction.
+
+However, the allocation of memory for boundary quantities and their calculation is performed only on the coarsest grid of any hierarchy. SO the boundary extrapolation is now compatible with AMR techniques.
+
+We implemented the option of producing spatially reduced ascii files, i.e. containing a number of boundary points reduced by a certain parameter, called reduction_factor. This is done to obtain smaller ascii files.

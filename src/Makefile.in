@@ -1,0 +1,115 @@
+.IGNORE:
+
+SHELL = /bin/sh
+
+prefix = @prefix@
+BBH_SYSTEM = @BBH_SYSTEM@
+bindir = ../bin
+
+BBH_SYSTEM = @BBH_SYSTEM@
+
+RNPL   = rnpl
+
+AR     = @AR@
+RANLIB = @RANLIB@
+
+F77_TRANSFORM = @F77_TRANSFORM@
+
+LIBS       = -lpamr -lamrd $(MPILIB) @LIBS@ @CCF77LIBS@ 
+LDFLAGS    = -L$(prefix)/lib @APP_LIB_PATHS@ @LDFLAGS@ -L. @BBH_MISC_FLFLAGS@
+
+CC       = @CC@
+CFLAGS     = @CFLAGS@ 
+CPPFLAGS = -I. -I$(prefix)/include @CPPFLAGS@ @APP_INCLUDE_PATHS@
+
+CC_COMP  = $(CC) -c $(CFLAGS) $(CPPFLAGS)
+CC_LOAD  = $(CC) $(LDFLAGS)
+
+F77      = @F77@
+F77FLAGS = @F77FLAGS@
+
+F77_COMP   = $(F77) -c $(F77FLAGS) 
+F77_LOAD   = $(F77) $(F77FLAGS) $(F77_LDFLAGS) $(LDFLAGS) 
+
+EXECUTABLES     = AdS4D
+
+# Miscellaneous files to clean up
+MISCDATAFILES   =
+
+SRC = *.f 
+
+all: $(EXECUTABLES)
+
+.f.o:
+	$(F77_COMP) $*.f 
+
+.c.o:
+	@CC_TRANSFORM@ $*.c > $*_.c
+	$(CC_COMP) -c $*_.c
+	mv $*_.o $*.o
+
+all: $(EXECUTABLES)
+
+install: all
+
+full: install confidence_tests
+
+confidence_tests:
+	echo "Not implemented yet"
+
+translate: 
+	touch translate
+
+AdS4D.o: AdS4D.h apph.h
+g_evo_opt.o: 
+init_nm1.o : 
+misc.o: 
+axisym.o:
+ires_kretsch_riemcube_ghconstr.o: 
+mg_sup.o: 
+init_hb.o: 
+init_ghbdot.o: 
+gauge.o: 
+apph.o: AdS4D.h apph.h
+exp.o:
+interp.o:
+quasiset.o:
+init_analytic_sols.o:
+ads_derivs_cartcoords.o:
+schwads_derivs_kerrschildcoords.o:
+kerrads_derivs_kerrschildcoords.o:
+sph_harm_perturb.o:
+radextrap_main.o:
+firstord_chrbdy_radextrap.o:
+firstord_func_radextrap.o:
+secondord_chrbdy_radextrap.o:
+secondord_func_radextrap.o:
+h_norm_densities.o:
+boost_perturb.o:
+subs_boost_phi1.o:
+phienangmom_densities.o:
+
+ADS4D_OBJS = AdS4D.o g_evo_opt.o init_nm1.o misc.o axisym.o ires_kretsch_riemcube_ghconstr.o mg_sup.o init_hb.o init_ghbdot.o gauge.o apph.o exp.o interp.o quasiset.o init_analytic_sols.o ads_derivs_cartcoords.o schwads_derivs_kerrschildcoords.o kerrads_derivs_kerrschildcoords.o sph_harm_perturb.o radextrap_main.o firstord_chrbdy_radextrap.o firstord_func_radextrap.o secondord_chrbdy_radextrap.o secondord_func_radextrap.o h_norm_densities.o boost_perturb.o subs_boost_phi1.o phienangmom_densities.o
+
+AdS4D: $(ADS4D_OBJS) 
+	$(CC_LOAD) $(ADS4D_OBJS) $(LIBS) -o AdS4D
+	cp AdS4D $(bindir)
+
+export:
+	autoconf
+	make clean
+	(cd ..; tar cfL $(PACKAGE).tar $(PACKAGE); rm $(PACKAGE).tar.Z; compress $(PACKAGE).tar; cp $(PACKAGE).tar.Z $(HOME)/autoconf)
+
+########################################################################
+# Clean-up
+########################################################################
+clean:
+	/bin/rm $(EXECUTABLES)
+	/bin/rm *_.c > /dev/null 2>&1 
+	/bin/rm *.o 
+	/bin/rm *.a
+	/bin/rm *.sdf
+	/bin/rm *.segdat
+	/bin/rm *~
+	/bin/rm  Makefile config.cache config.log config.status
+	/bin/rm $(MISCDATAFILES)

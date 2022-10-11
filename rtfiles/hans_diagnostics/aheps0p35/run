@@ -1,0 +1,3 @@
+cat AdS4D.fparam sph_symm_AdS4D.rtparam_L1 > localAdS4D.param
+/bin/cp /home/bantilan/numrel/AdS4D/src/AdS4D localAdS4D
+mpirun -np 6 ./localAdS4D localAdS4D.param | tee out

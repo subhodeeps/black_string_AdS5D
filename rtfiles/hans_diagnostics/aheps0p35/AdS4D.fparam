@@ -1,0 +1,89 @@
+#---------- AdS 4D axisymmetric fixed parameter file --------------------------
+
+app_name := ["AdS 4D, 3+1 Cartesian "]
+
+#==============================================================================
+
+dim := 3
+num_evo_tl := 3
+ic_n := 2
+t0 := 0
+
+base_bbox := [-1.0 1.0 -1.0 1.0 -1.0 1.0]
+
+#==============================================================================
+# Also, excision is not optional
+#==============================================================================
+ex :=1
+do_ex :=1
+
+#==============================================================================
+# NOTE: the gb_ab,psi and Hb_a are the *regular* quantities 
+#       with the appropriate divergent terms factored out.
+#       See the maple scripts for the exact definitions     
+#==============================================================================
+
+num_hyperbolic_vars := 30
+hyperbolic_vars := [ "phi1" "gb_tt" "gb_tx" "gb_ty" "gb_tz" "gb_xx" "gb_xy" "gb_xz" "gb_yy" "gb_yz" "psi" "Hb_t" "Hb_x" "Hb_y" "Hb_z" "phi1_t" "gb_tt_t" "gb_tx_t" "gb_ty_t" "gb_tz_t" "gb_xx_t" "gb_xy_t" "gb_xz_t" "gb_yy_t" "gb_yz_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_y_t" "Hb_z_t" ]
+
+#==============================================================================
+# For now only time-symmetric initial data ... 'conformal' to AdS space
+# with conformal factor zeta 
+#==============================================================================
+
+num_elliptic_vars_t0 := 1
+elliptic_vars_t0 := ["zeta"]
+
+#==============================================================================
+# "work" variables ... residuals, inverse metric components, etc.
+#==============================================================================
+
+num_AMRH_work_vars := 86
+AMRH_work_vars := [ "gb_tt_x_n" "gb_tt_x_np1" "gb_xx_x_n" "gb_xx_x_np1" "phi1_res" "gb_res" "hb_t_res" "hb_i_res" "efe_all_ires" "efe_tt_ires" "efe_tx_ires" "efe_ty_ires" "efe_tz_ires" "efe_xx_ires" "efe_xy_ires" "efe_xz_ires" "efe_yy_ires" "efe_yz_ires" "efe_psi_ires" "kg_ires" "chrbdy" "quasiset_tt" "quasiset_tchi" "quasiset_txi" "quasiset_chichi" "quasiset_chixi" "quasiset_xixi" "quasiset_massdensity" "quasiset_trace" "AdS_mass" "locoeffphi1" "xextrap" "yextrap" "zextrap" "kretsch" "relkretsch" "relkretschcentregrid" "w1" "w2" "w3" "w4" "alpha" "theta" "f" "tfunction" "iresall" "irestt" "irestx" "iresty" "irestz" "iresxx" "iresxy" "iresxz" "iresyy" "iresyz" "irespsi" "ireskg" "qstt" "qstx" "qsty" "qsxx" "qsxy" "qsyy" "qspsi" "qsmass" "qsone" "test1" "test2" "test3" "test4" "gu_tt" "gu_tx" "gu_ty" "gu_tz" "gu_xx" "gu_xy" "gu_xz" "gu_yy" "gu_yz" "gu_psi" "m_g_det" "Hb_t_0" "Hb_x_0" "Hb_y_0" "Hb_z_0" "cl_res" ]
+
+
+num_MGH_work_vars := 4
+MGH_work_vars := [ "mg_w1" "mg_w2" "mg_w3" "mg_w4" ]
+
+num_AMRH_work_in_MGH_vars := 28
+AMRH_work_in_MGH_vars := [ "phi1_res" "gb_res" "gb_ii_res" "hb_t_res" "hb_i_res" "efe_all_ires" "efe_tt_ires" "efe_xx_ires" "efe_xy_ires" "efe_xz_ires" "efe_yy_ires" "efe_yz_ires" "efe_psi_ires" "kg_ires" "w1" "w2" "w3" "w4" "alpha" "theta" "test1" "test2" "test3" "test4" "Hb_t_0" "Hb_x_0" "Hb_y_0" "cl_res" ]
+
+num_amr_inject   := 30
+amr_inject       := [ "phi1" "gb_tt" "gb_tx" "gb_ty" "gb_tz" "gb_xx" "gb_xy" "gb_xz" "gb_yy" "gb_yz" "psi" "Hb_t" "Hb_x" "Hb_y" "Hb_z" "phi1_t" "gb_tt_t" "gb_tx_t" "gb_ty_t" "gb_tz_t" "gb_xx_t" "gb_xy_t" "gb_xz_t" "gb_yy_t" "gb_yz_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_y_t" "Hb_z_t" ]
+
+num_amr_sync     := 30
+amr_sync         := [ "phi1" "gb_tt" "gb_tx" "gb_ty" "gb_tz" "gb_xx" "gb_xy" "gb_xz" "gb_yy" "gb_yz" "psi" "Hb_t" "Hb_x" "Hb_y" "Hb_z" "phi1_t" "gb_tt_t" "gb_tx_t" "gb_ty_t" "gb_tz_t" "gb_xx_t" "gb_xy_t" "gb_xz_t" "gb_yy_t" "gb_yz_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_y_t" "Hb_z_t" ]
+
+num_amr_interp4  := 30
+amr_interp4      := [ "phi1" "gb_tt" "gb_tx" "gb_ty" "gb_tz" "gb_xx" "gb_xy" "gb_xz" "gb_yy" "gb_yz" "psi" "Hb_t" "Hb_x" "Hb_y" "Hb_z" "phi1_t" "gb_tt_t" "gb_tx_t" "gb_ty_t" "gb_tz_t" "gb_xx_t" "gb_xy_t" "gb_xz_t" "gb_yy_t" "gb_yz_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_y_t" "Hb_z_t" ]
+
+num_amr_transfer4:= 30
+amr_transfer4    := [ "phi1" "gb_tt" "gb_tx" "gb_ty" "gb_tz" "gb_xx" "gb_xy" "gb_xz" "gb_yy" "gb_yz" "psi" "Hb_t" "Hb_x" "Hb_y" "Hb_z" "phi1_t" "gb_tt_t" "gb_tx_t" "gb_ty_t" "gb_tz_t" "gb_xx_t" "gb_xy_t" "gb_xz_t" "gb_yy_t" "gb_yz_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_y_t" "Hb_z_t" ] 
+
+num_mg_hw_restr  := 2
+mg_hw_restr      := [ "zeta" "phi1" ]
+
+num_mg_sync      := 1
+mg_sync          := [ "zeta" ]
+
+num_mg_interp2   := 1
+mg_interp2       := [ "zeta" ]
+
+num_MG_cnst_data_vars := 28
+MG_cnst_data_vars := [ "gb_tt" "gb_tx" "gb_ty" "gb_tz" "gb_xx" "gb_xy" "gb_xz" "gb_yy" "gb_yz" "psi" "Hb_t" "Hb_x" "Hb_y" "Hb_z" "gb_tt_t" "gb_tx_t" "gb_ty_t" "gb_tz_t" "gb_xx_t" "gb_xy_t" "gb_xz_t" "gb_yy_t" "gb_yz_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_y_t" "Hb_z_t" ] 
+
+num_rg_diss_vars := 30
+rg_diss_vars     := [ "phi1" "gb_tt" "gb_tx" "gb_ty" "gb_tz" "gb_xx" "gb_xy" "gb_xz" "gb_yy" "gb_yz" "psi" "Hb_t" "Hb_x" "Hb_y" "Hb_z" "phi1_t" "gb_tt_t" "gb_tx_t" "gb_ty_t" "gb_tz_t" "gb_xx_t" "gb_xy_t" "gb_xz_t" "gb_yy_t" "gb_yz_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_y_t" "Hb_z_t" ] 
+
+num_tn_diss_vars := 30
+tn_diss_vars := [ "phi1" "gb_tt" "gb_tx" "gb_ty" "gb_tz" "gb_xx" "gb_xy" "gb_xz" "gb_yy" "gb_yz" "psi" "Hb_t" "Hb_x" "Hb_y" "Hb_z" "phi1_t" "gb_tt_t" "gb_tx_t" "gb_ty_t" "gb_tz_t" "gb_xx_t" "gb_xy_t" "gb_xz_t" "gb_yy_t" "gb_yz_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_y_t" "Hb_z_t" ] 
+
+num_tnp1_diss_vars := 30
+tnp1_diss_vars := [ "phi1" "gb_tt" "gb_tx" "gb_ty" "gb_tz" "gb_xx" "gb_xy" "gb_xz" "gb_yy" "gb_yz" "psi" "Hb_t" "Hb_x" "Hb_y" "Hb_z" "phi1_t" "gb_tt_t" "gb_tx_t" "gb_ty_t" "gb_tz_t" "gb_xx_t" "gb_xy_t" "gb_xz_t" "gb_yy_t" "gb_yz_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_y_t" "Hb_z_t" ] 
+
+#num_even_vars_x1min := 22
+#even_vars_x1min := [ "phi1" "gb_tt" "gb_tx" "gb_tz" "gb_xx" "gb_xz" "gb_yy" "Hb_t" "Hb_x" "Hb_z" "psi" "phi1_t" "gb_tt_t" "gb_tx_t" "gb_tz_t" "gb_xx_t" "gb_xz_t" "gb_yy_t" "psi_t" "Hb_t_t" "Hb_x_t" "Hb_z_t" ]
+#num_odd_vars_x1min := 8
+#odd_vars_x1min := [ "gb_ty" "gb_xy" "gb_yz" "Hb_y" "gb_ty_t" "gb_xy_t" "gb_yz_t" "Hb_y_t"]
+#
+#-----------------------------------------------------

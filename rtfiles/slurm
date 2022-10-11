@@ -1,0 +1,17 @@
+#!/bin/bash
+############################################################
+## 'man qsub' for additional information.
+############################################################
+
+#SBATCH -J AdS4D
+#SBATCH -N 5
+#SBATCH -n 128
+#SBATCH --mem-per-cpu=4000 
+#SBATCH -t 24:00:00
+
+module load intel
+module load openmpi
+
+cat /home/bantilan/numrel/AdS4D/src/AdS4D.fparam rtparam > localAdS4D.param
+/bin/cp /home/bantilan/numrel/AdS4D/src/AdS4D localAdS4D
+srun ./localAdS4D localAdS4D.param | tee out

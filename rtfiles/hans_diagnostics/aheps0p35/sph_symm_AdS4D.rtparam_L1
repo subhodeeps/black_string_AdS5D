@@ -1,0 +1,227 @@
+dim := 3
+
+refsym := 0
+
+#------ Initial Data -------------------------------------------------------
+
+#scalar field ID#
+phi1_amp_1 := 1.2
+phi1_r0_1 := 0.0
+phi1_delta_1 := 0.2
+phi1_x0_1 := [0.0 0.0 0.0]
+phi1_ecc_1 := [0.2 0.2 0.2]
+phi1_B_1 := 0.0
+phi1_C_1 := 0.0
+
+rhoc := 0.4
+rhod := 0.8
+stype := 0
+
+#AdS4D-Schwarzschild BH ID#
+ief_bh_r0 := 0.0
+
+#AH-finder#
+AH_Lmin := 1
+AH_rsteps := 10
+AH_eps := 0.35
+AH_max_iter := 10000
+AH_lambda := 0.001
+AH_tol := 1e-2
+AH_r0 := 0.10
+AH_r1 := 0.50
+AH_xc :=[0.0 0.0 0.0]
+AH_Nchi := 17
+AH_Nphi := 33
+AH_freq := 1
+AH_freq_aft := 1
+#excision buffer, i.e. how wide the region to evolve within the AH (or the AdS boundary if there is no BH) is
+ex_rbuf := 0.35
+AH_reset_scale := 1.1
+AH_max_iter_2 := 0
+AH_max_iter_3 := 0
+AH_max_iter_4 := 0
+AH_tmin := 0
+output_metricatAH := 1
+
+#general (set skip_constraints=1 to make sure Hb_a=0 set to zero;#
+#         otherwise init_hb.f will set Hb_a=-C_a not exactly zero)#
+#        (set skip_constraints=1 to make sure gb_ij_nm1,gb_ij_np1 set to zero;#
+#         otherwise init_nm1.f,init_np1.f will initialize by double-dots)#
+#        (also, skip_constraints=1 && ief_bh_r0!=0 for adsbh initial data) 
+ 
+background := 0
+skip_constraints := 0
+output_ires := 1
+output_bdyquantities := 1
+output_AdS_mass := 0
+output_relkretschcentregrid := 1
+output_kretsch := 1
+reduced_ascii := 0
+reduction_factor := 1
+alltimes_ascii := 1
+timestep_ascii := 1
+
+#------ interpolation parameters (0:off,1:xy2pt,2:rho2pt,3:rho3pt) ---------
+
+interptype := 0
+
+#------ shift interior by integer multiples of dx, away from the boundary --
+
+i_shift := 0
+
+#------ axis reg (1:deriv_1pt,4:interp_2pt,5:deriv_2pt,6:deriv_3pt----------
+#(NOTE: 2:deriv_1pt_sets_gb_yy, 3:experimental_2pt, 7:deriv_3pt_sets_gb_yy)
+
+regtype := 2
+
+#------ trace parameters (most off) ----------------------------------------
+
+echo_params := 1
+pamr_trace_lev := 0
+MG_trace := 2
+MG_DV_trace := 0
+MG_DV_trace_t_on := -1
+MG_DV_trace_t_off := 1
+evo_trace := 2
+evo_DV_trace := 0
+evo_DV_trace_t_on := -1
+evo_DV_trace_t_off := 1
+ID_DV_trace := 0
+
+#------ grid/parallel/AMR parameters ---------------------------------------
+base_shape := [65 65 65]
+max_lev := 1
+lambda := 0.2
+rho_sp := 2
+rho_tm := 2
+
+min_width := [9 9 9]
+min_mg_cwidth := [5 5 5]
+gdm_no_overlap := 1
+ghost_width := [4 4 4]
+TRE_max := 1.0e-5
+num_TRE_vars := 1
+TRE_vars := [ "phi1" ]
+TRE_buffer := 8
+TRE_ibc_buffer := 16
+TRE_exc_buffer := 2
+TRE_exc_buffer_lmin := 6
+TRE_ibcp_buffer := 0
+TRE_sgpbh := 1
+regrid_interval := 32
+regrid_min_lev := 2
+TRE_norm := 0
+regrid_script := 0
+regrid_script_name = "AdS4D.rgs"
+
+cls_merge_dist := 8
+cls_method := 0
+cls_align_mode := 1
+
+#------ constraint damping -------------------------------------------------
+          
+kappa_cd := -10.0
+rho_cd := -1.0
+kappa_cd_cosn := 0
+
+#------ gauge --------------------------------------------------------------
+gauge_t := 3
+gauge_i := 3
+rho1_t := 0.0
+rho2_t := 0.95
+rho3_t := 0.05
+rho4_t := 0.95
+xi1_t := 0.1
+xi2_t := 0.0025
+cbulk_t := 0.0
+c1_t := 20.0
+c2_t := 0.5
+c3_t := 1.0
+rho1_i := 0.0
+rho2_i := 0.95
+rho3_i := 0.05
+rho4_i := 0.95
+xi1_i := 0.1
+xi2_i := 0.0025
+cbulk_i := 0.0
+c1_i := 20.0
+c2_i := 0.5
+c3_i := 1.0
+
+rhoa := 0.5
+rhob := 0.9
+
+#------ dissipation --------------------------------------------------------
+
+# (turned off dissipation for now, to make np1,n,nm1 diagnostics cleaner)
+# (automatic KO diss applied to nm1 just before app_evolve hook fnct called)
+# (dissipation really alters ind. res.)
+tn_eps_diss := 0.35
+tnp1_eps_diss := 0.0
+diss_bdy := 1
+repop_diss_bdy := 1
+diss_all_past := 1
+
+diss_kmax := 0
+diss_eps_k_cutoff_n := 0
+diss_eps_k := 0.35
+diss_bdy_k := 1
+diss_all_past_k := 0
+diss_eps_y_cutoff := 1
+diss_all := 1
+
+#------- check-pointing (off) ---------------------------------------------
+
+cp_restart := 0
+cp_delta_t_hrs := 0.0
+cp_save_fname := "cp_L1"
+cp_restore_fname := "cp_L1_A"
+
+#------- solution related -------------------------------------------------
+
+steps := 2
+evo_max_iter := 25
+evo_min_iter := 1
+evo_tol := 1.0e-10
+
+MG_max_iter := 25
+MG_min_iter := 1
+MG_max_citer := 1000
+MG_pre_swp := 3
+MG_pst_swp := 3
+MG_w0 := 1.0
+MG_tol := 1.0e-8
+MG_crtol := 1.0e-2
+MG_extrap_method := 0
+MG_eps_c := 1.0
+
+skip_frg := 1
+evo_ssc := 0
+
+id_method := 0
+id_pl_method := 3
+
+np1_initial_guess := 1
+io_node := 0
+
+max_t_interp_order := 3
+
+#------- IO ---------------------------------------------------------------
+
+num_save_1_vars := 4
+save_1_vars := [ "iresall" "gb_res" "gb_xx" "Hb_x" ]
+
+num_save_2_vars := 4
+save_2_vars := [ "gb_xx" "psi" "Hb_x" "phi1" ]
+
+num_save_3_vars := 2
+save_3_vars := [ "gb_xx" "Hb_x" ]
+
+calc_global_var_norms := 1
+global_var_norm_floor := 1
+
+save_tag := "AdS4D_3p1_gauge3_L1_"
+
+save_ivec := 1-*/1
+
+#-----------------------------------------------------
