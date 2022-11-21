@@ -1,7 +1,7 @@
 //=============================================================================
 // in cartesian coordinates t,x,y,z for x,y,z in [-1,1]
 //
-// NOTES: ==> uses the global variables of AdS4D
+// NOTES: ==> uses the global variables of UniBSAdS5D
 //        ==> hierarchy between Lmin and Lmax must be in-sync
 //        ==> assumed time structure ... n,nm1,np1
 //        ==> the current AH structure is specified by c_AH (0 indexed)
@@ -39,7 +39,7 @@
 #include <m_util_r8.h>
 #include <bbhutil.h>
 #include <mpi.h>
-#include "AdS4D.h"
+#include "UniBSAdS5D.h"
 #include "apph.h"
 
 #define UNOWNED -1e10
