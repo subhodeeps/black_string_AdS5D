@@ -4011,117 +4011,86 @@ c------------------------------------------------------------------------
 
 
 c----------------------------------------------------------------------
-c calculates inverse of a symmetric 4x4 matrix
+c calculates inverse of a 3x3 matrix
 c----------------------------------------------------------------------
-        subroutine calc_g0uu(g11,g12,g13,g14,g22,g23,g24,
-     &                       g33,g34,g44,
-     &                       ginv11,ginv12,ginv13,ginv14,ginv22,
-     &                       ginv23,ginv24,ginv33,ginv34,ginv44,detg)
-        implicit none
-        real*8 g11,g12,g13,g14
-        real*8 g22,g23,g24
-        real*8 g33,g34
-        real*8 g44
-        real*8 ginv11,ginv12,ginv13,ginv14
-        real*8 ginv22,ginv23,ginv24
-        real*8 ginv33,ginv34
-        real*8 ginv44
-        real*8 detg                      
+        subroutine calc_inv(matr,detmatr,matr_inv)
 
-        real*8 invdenominator
+        implicit none
+        real*8 matr(3,3),matr_inv(3,3)
+        real*8 detmatr
+
+        data detmatr/0.0/
+        data matr_inv/9*0.0/
 
         !--------------------------------------------------------------
 
-          detg=g13**2*g24**2 - g11*g24**2*g33 + 
-     -  g14**2*(g23**2 - g22*g33) - 
-     -  2*g12*g13*g24*g34 + 
-     -  2*g11*g23*g24*g34 + g12**2*g34**2 - 
-     -  g11*g22*g34**2 + 
-     -  2*g14*(-(g13*g23*g24) + 
-     -     g12*g24*g33 + g13*g22*g34 - 
-     -     g12*g23*g34) - 
-     -  (g13**2*g22 - 2*g12*g13*g23 + 
-     -     g11*g23**2 + g12**2*g33 - 
-     -     g11*g22*g33)*g44
+          detmatr= matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -     matr(2,1)*matr(3,2)) + 
+     -  matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -  matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
 
-        invdenominator=
-     &      g14**2*g23**2 - 2*g13*g14*g23*g24 + g13**2*g24**2 - 
-     &      g14**2*g22*g33 + 2*g12*g14*g24*g33 - g11*g24**2*g33 + 
-     &      2*g13*g14*g22*g34 - 2*g12*g14*g23*g34 - 2*g12*g13*g24*g34 + 
-     &      2*g11*g23*g24*g34 + g12**2*g34**2 - g11*g22*g34**2 - 
-     &      g13**2*g22*g44 + 2*g12*g13*g23*g44 - g11*g23**2*g44 - 
-     &      g12**2*g33*g44 + g11*g22*g33*g44
+        if (abs(detmatr).gt.10.0d0**(-10)) then
 
-        ginv11=
-     &      (
-     &      -(g24**2*g33) + 2*g23*g24*g34 - g22*g34**2 - g23**2*g44 
-     &      + g22*g33*g44
-     &      )
-     &      /invdenominator
-        ginv12=
-     &      (
-     &      g14*g24*g33 - g14*g23*g34 - g13*g24*g34 + g12*g34**2 + 
-     &      g13*g23*g44 - g12*g33*g44
-     &      )
-     &      /invdenominator
-        ginv13=
-     &      (
-     &      -(g14*g23*g24) + g13*g24**2 + g14*g22*g34 - g12*g24*g34 - 
-     &      g13*g22*g44 + g12*g23*g44
-     &      )
-     &      /invdenominator
-        ginv14=
-     &      (
-     &      g14*g23**2 - g13*g23*g24 - g14*g22*g33 + g12*g24*g33 + 
-     &      g13*g22*g34 - g12*g23*g34
-     &      )
-     &      /invdenominator
-        ginv22=
-     &      (
-     &      -(g14**2*g33) + 2*g13*g14*g34 - g11*g34**2 - g13**2*g44 
-     &      + g11*g33*g44
-     &      )
-     &      /invdenominator
-        ginv23=
-     &      (
-     &      g14**2*g23 - g13*g14*g24 - g12*g14*g34 + g11*g24*g34 + 
-     &      g12*g13*g44 - g11*g23*g44
-     &      )
-     &      /invdenominator
-        ginv24=
-     &      (
-     &      -(g13*g14*g23) + g13**2*g24 + g12*g14*g33 - g11*g24*g33 - 
-     &      g12*g13*g34 + g11*g23*g34
-     &      )
-     &      /invdenominator
-        ginv33=
-     &      (
-     &      -(g14**2*g22) + 2*g12*g14*g24 - g11*g24**2 - g12**2*g44 
-     &      + g11*g22*g44
-     &      )
-     &      /invdenominator
-        ginv34=
-     &      (
-     &      g13*g14*g22 - g12*g14*g23 - g12*g13*g24 + g11*g23*g24 + 
-     &      g12**2*g34 - g11*g22*g34
-     &      )
-     &      /invdenominator
-        ginv44=
-     &      (
-     &      -(g13**2*g22) + 2*g12*g13*g23 - g11*g23**2 - g12**2*g33 
-     &      + g11*g22*g33
-     &      )
-     &      /invdenominator
-!        g0_uu(1,1)=0
-!        g0_uu(1,2)=0
-!        g0_uu(1,3)=0
-!        g0_uu(1,4)=0
-!        g0_uu(2,2)=0
-!        g0_uu(2,3)=0
-!        g0_uu(2,4)=0
-!        g0_uu(3,3)=0
-!        g0_uu(3,4)=0
-!        g0_uu(4,4)=0
+
+            matr_inv(1,1)=(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))/
+     -  (matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -       matr(2,1)*matr(3,2)) + 
+     -    matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -    matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
+     -    )
+            matr_inv(1,2)=(matr(1,3)*matr(3,2) - matr(1,2)*matr(3,3))/
+     -  (matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -       matr(2,1)*matr(3,2)) + 
+     -    matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -    matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
+     -    )
+            matr_inv(1,3)=(-(matr(1,3)*matr(2,2)) + matr(1,2)*matr(2,3))/
+     -  (matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -       matr(2,1)*matr(3,2)) + 
+     -    matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -    matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
+     -    )
+            matr_inv(2,1)=(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3))/
+     -  (matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -       matr(2,1)*matr(3,2)) + 
+     -    matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -    matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
+     -    )
+            matr_inv(2,2)=(-(matr(1,3)*matr(3,1)) + matr(1,1)*matr(3,3))/
+     -  (matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -       matr(2,1)*matr(3,2)) + 
+     -    matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -    matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
+     -    )
+            matr_inv(2,3)=(matr(1,3)*matr(2,1) - matr(1,1)*matr(2,3))/
+     -  (matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -       matr(2,1)*matr(3,2)) + 
+     -    matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -    matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
+     -    )
+            matr_inv(3,1)=(-(matr(2,2)*matr(3,1)) + matr(2,1)*matr(3,2))/
+     -  (matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -       matr(2,1)*matr(3,2)) + 
+     -    matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -    matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
+     -    )
+            matr_inv(3,2)=(matr(1,2)*matr(3,1) - matr(1,1)*matr(3,2))/
+     -  (matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -       matr(2,1)*matr(3,2)) + 
+     -    matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -    matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
+     -    )
+            matr_inv(3,3)=(-(matr(1,2)*matr(2,1)) + matr(1,1)*matr(2,2))/
+     -  (matr(1,3)*(-(matr(2,2)*matr(3,1)) + 
+     -       matr(2,1)*matr(3,2)) + 
+     -    matr(1,2)*(matr(2,3)*matr(3,1) - matr(2,1)*matr(3,3)) + 
+     -    matr(1,1)*(-(matr(2,3)*matr(3,2)) + matr(2,2)*matr(3,3))
+     -    )
+
+        else
+            write(*,*) "ERROR: singular metric - inverse not computed"
+            stop
+        end if
         
        return
        end

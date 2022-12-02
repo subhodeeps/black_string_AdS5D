@@ -60,27 +60,10 @@ confidence_tests:
 translate: 
 	touch translate
 
-UniBSAdS5D.o: UniBSAdS5D.h apph.h
-g_evo_opt.o: 
-init_nm1.o : 
-misc.o: 
-axisym.o:
-ires_kretsch_riemcube_ghconstr.o: 
-mg_sup.o: 
-init_hb.o: 
-init_ghbdot.o: 
-gauge.o: 
-apph.o: UniBSAdS5D.h apph.h
-exp.o:
-interp.o:
-quasiset.o:
-init_analytic_sols.o:
-ads_derivs_cartcoords.o:
-schwads_derivs_kerrschildcoords.o:
-kerrads_derivs_kerrschildcoords.o:
+UniBSAdS5D.o: UniBSAdS5D.h
 
 
-UNIBSADS5D_OBJS = UniBSAdS5D.o g_evo_opt.o init_nm1.o misc.o axisym.o ires_kretsch_riemcube_ghconstr.o mg_sup.o init_hb.o init_ghbdot.o gauge.o apph.o exp.o interp.o quasiset.o init_analytic_sols.o ads_derivs_cartcoords.o schwads_derivs_kerrschildcoords.o kerrads_derivs_kerrschildcoords.o sph_harm_perturb.o radextrap_main.o firstord_chrbdy_radextrap.o firstord_func_radextrap.o secondord_chrbdy_radextrap.o secondord_func_radextrap.o h_norm_densities.o boost_perturb.o subs_boost_phi1.o phienangmom_densities.o
+UNIBSADS5D_OBJS = UniBSAdS5D.o
 
 UniBSAdS5D: $(UNIBSADS5D_OBJS) 
 	$(CC_LOAD) $(UNIBSADS5D_OBJS) $(LIBS) -o UniBSAdS5D

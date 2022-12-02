@@ -1,23 +1,9 @@
 dim := 3
 
-refsym := 0
-
-kerrads_background := 1
+unibs_background := 1
 
 #------ Initial Data -------------------------------------------------------
 
-#scalar field ID#
-phi1_amp_1 := 0.0
-phi1_r0_1 := 0.0
-phi1_delta_1 := 0.2
-phi1_x0_1 := [0.0 0.7 0.0]
-phi1_ecc_1 := [0.2 0.2 0.2]
-phi1_B_1 := 0.0
-phi1_C_1 := 0.0
-
-rhoc := 0.4
-rhod := 0.8
-stype := 0
 
 #Lorent boost parameters
 boost_v_1 := [0.0 0.0 0.0]
@@ -27,72 +13,14 @@ boost_delta_1 := 0.2
 boost_x0_1 := [0.0 -0.6 0.0]
 boost_ecc_1 := [0.2 0.2 0.2]
 
-boost_v_2 := [0.0 0.0 0.0]
-boost_amp_2 := 0.0
-boost_r0_2 := 0.0
-boost_delta_2 := 0.2
-boost_x0_2 := [0.0 -0.3 -0.2]
-boost_ecc_2 := [0.2 0.2 0.2]
 
-#Either add perturbations to the initial data or substitute the entire initial data with the boosted profile
-add_perturb := 0
-subs_perturb := 0
+#Initial radius parameter of uniform black string#
+ief_bh_r0 := 0.3
 
-
-#UniBSAdS5D-Kerr BH ID#
-ief_bh_r0 := 0.8
-a_rot0 := 0.0
+#------ excision ---------
+ex_rbuf := 0.3
 
 #------ AH-finder ---------
-#AH_Lmin := 2
-#AH_Lmax := 2
-AH_rsteps := 10
-AH_eps := 0.0
-AH_max_iter := 00000
-AH_max_iter_2 := 0
-AH_max_iter_3 := 0
-AH_max_iter_4 := 0
-AH_lambda := 0.001
-AH_tol := 1e-2
-AH_r0 := 0.1
-AH_r1 := 0.4
-#AH_analytic_kerrads to use AH finder with analytic Kerr-AdS horizon radius as initial guess (not needed when evolving a pure AdS background)
-AH_analytic_kerrads := 1
-#To use max and min of analytic Kerr-AdS horizon radius as range of sample spheres for AH finder, in case AH_analytic_kerrads=0. (This flag does nothing in the case of Schwarzschild-AdS background.)
-AH_rsample_maxminkerrads := 0
-AH_xc := [0.0 0.0 0.0]
-AH_Nchi := 17
-AH_Nphi := 33
-AH_freq := 1
-AH_freq_aft := 1
-#excision_type=0: no internal excision - excision_type=1: spherical excised region - excision_type=2: elliptic excised region - excision_type=3: AH-shaped excised region
-excision_type := 2
-#excision buffer, i.e. size of the region to evolve within the AH (or the AdS boundary if there is no BH)
-ex_rbuf := 0.4
-AH_reset_scale := 1.1
-AH_tmin := 0
-#if the following are disabled, we only output the position of the AH and the expansion theta in .sdf files
-output_moreAHquant_sdf := 0
-output_metricAH_cart_sdf := 1
-output_metricAH_sph_sdf := 0
-#setting output_kretschAH_sdf to 1 will output Kretschmann at the AH only if output_kretsch is enabled
-output_kretschAH_sdf := 1
-output_riemanncubeAH_sdf := 1
-output_moreAHquant_ascii := 0
-output_AHtheta_ascii := 0
-output_metricAH_cart_ascii := 1
-output_metricAH_sph_ascii := 1
-#setting output_kretschAH_ascii to 1 will output Kretschmann at the AH only if output_kretsch is enabled
-output_kretschAH_ascii := 0
-output_riemanncubeAH_ascii := 0
-output_diagnosticAH_ascii := 1
-#Option important when restarting from checkpoint: in case the excision surface of the new run is smaller than the one in the old one, this option makes sure that all the points excised in the previous run are excised in the current one
-excise_prev_run_ex_pts := 0
-#excision ellipse semi-axes of the previous run when restarting from checkpoint: they must be set only if we are enabling excise_prev_run_ex_pts
-prev_run_ex_r := [0.0 0.0 0.0]
-prev_run_ex_r_2 := [0.0 0.0 0.0]
-prev_run_ex_r_3 := [0.0 0.0 0.0]
-prev_run_ex_r_4 := [0.0 0.0 0.0]
 
 #general (set skip_constraints=1 to make sure Hb_a=0 set to zero;#
 #         otherwise init_hb.f will set Hb_a=-C_a not exactly zero)#
@@ -102,60 +30,13 @@ prev_run_ex_r_4 := [0.0 0.0 0.0]
  
 background := 0
 skip_constraints := 1
-output_ires_ghconstr := 0
+output_ires := 0
 output_kretsch := 0
-#setting output_kretschcentregrid to 1 will output relative Kretschmann at the centre of the grid only if output_kretsch is enabled
-output_kretschcentregrid := 0
-output_riemanncube := 0
-output_sqrth10normdensity_phi := 0
-output_sqrten2density_phi := 0
-output_sqrtphienangmomdensity := 0
 
 #------ Boundary extrapolation ---------
-output_bdyquantities := 0
-bdy_L := 1
-#if rad_extrap=1 we use boundary extrapolation along radial direction (output saved in the freepts txt files)
-#if rad_extrap=0 we extrapolate along Cartesian directions
-rad_extrap := 1
-output_outermostpts := 1
-bdy_extrap_freepts := 1
-bdy_extrap_fixedpts := 1
-half_steps_from_bdy_ext_paramset1 := 9
-half_steps_from_bdy_ext_paramset2 := 5
-half_steps_from_bdy_int_paramset1 := 12
-half_steps_from_bdy_int_paramset2 := 12
-output_bdy_extraporder1_paramset1 := 1
-output_bdy_extraporder2_paramset1 := 1
-output_bdy_extraporder3_paramset1 := 1
-output_bdy_extraporder4_paramset1 := 0
-output_bdy_extraporder1_paramset2 := 1
-output_bdy_extraporder2_paramset2 := 1
-output_bdy_extraporder3_paramset2 := 1
-output_bdy_extraporder4_paramset2 := 0
-output_bdyphi            := 1
-output_bdytrace          := 1
-output_bdymassdens       := 1
-output_bdyangmomdens     := 1
-#Notice: AdS_mass calculation involves a double integral on the boundary sphere. 
-#This calculation is reliable only when using 1 core
-output_AdS_mass := 0
-reduced_ascii := 0
-reduction_factor_ascii := 24
-alltimes_ascii := 0
-timestep_ascii := 1
-
-#------ interpolation parameters (0:off,1:xy2pt,2:rho2pt,3:rho3pt) ---------
-
-interptype := 0
-
-#------ shift interior by integer multiples of dx, away from the boundary --
-
-i_shift := 0
 
 #------ axis reg (1:deriv_1pt,4:interp_2pt,5:deriv_2pt,6:deriv_3pt----------
 #(NOTE: 2:deriv_1pt_sets_gb_yy, 3:experimental_2pt, 7:deriv_3pt_sets_gb_yy)
-
-regtype := 2
 
 #------ trace parameters (most off) ----------------------------------------
 
@@ -172,12 +53,6 @@ evo_DV_trace_t_off := 1
 ID_DV_trace := 0
 
 #------ grid/parallel/AMR parameters ---------------------------------------
-ratio_Lhighres_Llowres := 2.0
-#resolution_degree is the degree of the current resolution w.r.t. to the lowest resolution that we are going to use to for the convergence factor, i.e. 1 for the lowest resolution, 2 for the middle one and  3 for the highest one
-resolution_degree := 1
-max_resolution_degree := 4
-#reduction_factor is the factor by which we need to reduce the number points of the lowest resolution used for convergence (i.e. the resolution with degree 1) so that we only select points that are present also in the resolutions with degree 2 and 3. To get the exact same points in higher resolutions, we need to reduce by a factor (reduction_factor**(max_resolution_degree-1))*((ratio_Lhighres_Llowres)**(resolution_degree-1)). ratio_Lhighres_Llowres and reduction_factor must be chosen so that this factor is an integer for all resolutions
-reduction_factor := 2
 
 #base_shape := [11 11 11]
 #base_shape := [19 19 19]
@@ -194,8 +69,8 @@ min_mg_cwidth := [5 5 5]
 gdm_no_overlap := 1
 ghost_width := [4 4 4]
 TRE_max := 1.0e-5
-num_TRE_vars := 1
-TRE_vars := [ "phi1" ]
+num_TRE_vars := 0
+TRE_vars := []
 TRE_buffer := 8
 TRE_ibc_buffer := 16
 TRE_exc_buffer := 2
@@ -260,7 +135,7 @@ rhob := 0.6
 
 # (turned off dissipation for now, to make np1,n,nm1 diagnostics cleaner)
 # (automatic KO diss applied to nm1 just before app_evolve hook fnct called)
-# (dissipation really alters ind. res.)
+# (dissipation really alters independent resisudal)
 tn_eps_diss := 0.35
 tnp1_eps_diss := 0.0
 diss_bdy := 1
@@ -275,7 +150,7 @@ diss_all_past_k := 0
 diss_eps_y_cutoff := 1
 diss_all := 1
 
-#------- check-pointing (off) ---------------------------------------------
+#------- check-pointing ---------------------------------------------
 
 cp_restart := 0
 cp_delta_t_hrs := 0.0
