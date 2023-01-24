@@ -1,6 +1,11 @@
 dim := 3
 
+#set unibs_background to 1 to evolve perturbations of uniform black string 
+#with Schwarzschild slices in Cartesian Kerr-Schild (horizon-penetrating) coordinates
+#set unibs_background to 2 to evolve perturbations of uniform black string 
+#with Schwarzschild slices in Cartesian Gullstrand-Painleve-like (horizon-penetrating) coordinates (NOT YET IMPLEMENTED)
 unibs_background := 1
+
 
 #------ Initial Data -------------------------------------------------------
 
@@ -18,7 +23,7 @@ boost_ecc_1 := [0.2 0.2 0.2]
 ief_bh_r0 := 0.3
 
 #------ excision ---------
-ex_rbuf := 0.3
+ex_ybuf := 0.3
 
 #------ AH-finder ---------
 
@@ -105,31 +110,26 @@ rho_cd := -1.0
 kappa_cd_cosn := 0
 
 #------ gauge --------------------------------------------------------------
-gauge_t := 3
-gauge_i := 3
-rho1_t := 0.0
-rho2_t := 0.95
-rho3_t := 0.05
-rho4_t := 0.95
+gauge_t := 1
+gauge_i := 1
+x1_t := 0.0
+x2_t := 0.95
+x3_t := 0.05
+x4_t := 0.95
+y3_t := 0.05
+y4_t := 0.95
 xi1_t := 0.1
 xi2_t := 0.0025
 cbulk_t := 0.0
-c1_t := 20.0
-c2_t := 0.5
-c3_t := 1.0
-rho1_i := 0.0
-rho2_i := 0.95
-rho3_i := 0.05
-rho4_i := 0.95
+x1_i := 0.0
+x2_i := 0.95
+x3_i := 0.05
+x4_i := 0.95
+y3_i := 0.05
+y4_i := 0.95
 xi1_i := 0.1
 xi2_i := 0.0025
 cbulk_i := 0.0
-c1_i := 20.0
-c2_i := 0.5
-c3_i := 1.0
-
-rhoa := 0.3
-rhob := 0.6
 
 #------ dissipation --------------------------------------------------------
 
@@ -164,8 +164,8 @@ evo_max_iter := 25
 evo_min_iter := 1
 evo_tol := 1.0e-6
 
-MG_max_iter := 25
-MG_min_iter := 1
+MG_max_iter := 0
+MG_min_iter := 0
 MG_max_citer := 1000
 MG_pre_swp := 3
 MG_pst_swp := 3

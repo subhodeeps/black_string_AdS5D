@@ -10,7 +10,7 @@ c-------------------------------------------------------------------------------
 
 c--------------------------------------------------------------------------------
 c Metric components and their first and second derivatives, 
-c as well as Christoffel symbols and their first derivatives. 
+c as well as Christoffel symbols and their first derivatives 
 c--------------------------------------------------------------------------------
 
         subroutine modcartred_inders_metr(
@@ -256,7 +256,7 @@ c-------------------------------------------------------------------------------
 
 
 c--------------------------------------------------------------------------------
-c Source functions and their first derivatives.
+c Source functions and their first derivatives
 c--------------------------------------------------------------------------------
 
 
@@ -399,7 +399,7 @@ c-------------------------------------------------------------------------------
 
 
 c--------------------------------------------------------------------------------
-c Ricci tensor in generalised harmonic form.
+c Ricci tensor in generalised harmonic form
 c--------------------------------------------------------------------------------
 
 

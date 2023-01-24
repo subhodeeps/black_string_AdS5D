@@ -30,23 +30,46 @@
 #include <mpi.h>
 #include "UniBSAdS5D.h"
 
+const int app_dim=2; //It should match AMRD_dim!
 
 int cp_version;
 
-//=============================================================================
-// Excision parameters
-//=============================================================================
+real *g_norms;
 
-real ex_rbuf;
-int ex_reset_rbuf;
-real ex_y,ex_yc;
+real *x,*y;
+int shape[app_dim],ghost_width[2*app_dim],Nx,Ny,phys_bdy[2*app_dim],size,g_rank;
+real base_bbox[2*app_dim],bbox[2*app_dim],dx,dy,dt,dx_Lc,dy_Lc;
+int g_L;
 
 //=============================================================================
 // Background parameters
 //=============================================================================
 
+int unibs_background;
 real AdS_L;
 real ief_bh_r0;
+
+//=============================================================================
+// Excision parameters
+//=============================================================================
+
+int ex_reset_ybuf;
+real ex_ybuf;
+real ex_y,ex_yc;
+
+//=============================================================================
+// Enable/disable parameters
+//=============================================================================
+
+int background;
+
+//=============================================================================
+// Gauge parameters
+//=============================================================================
+int gauge_t;
+real x1_t,x2_t,x3_t,x4_t,y3_t,y4_t,xi1_t,xi2_t,cbulk_t;
+int gauge_i;
+real x1_i,x2_i,x3_i,x4_i,y3_i,y4_i,xi1_i,xi2_i,cbulk_i;
 
 //=============================================================================
 // Pointers for grid functions
@@ -88,13 +111,6 @@ real *cl_res;
 
 real *hb_t_res,*hb_i_res;
 real *Hb_t_0,*Hb_x_0,*Hb_y_0;
-
-real *g_norms;
-
-real *x,*y;
-int shape[2],ghost_width[4],Nx,Ny,phys_bdy[4],size,g_rank;
-real base_bbox[4],bbox[4],dx,dy,dt,dx_Lc,dy_Lc;
-int g_L;
 
 //=============================================================================
 // Grid function numbers: a grid function number (gfn) is an index,
@@ -262,12 +278,12 @@ void ldptr_bbox(void)
 
 	if (first) 
   	{
-       	first=0; 
-       	set_gfns();
-       	PAMR_get_global_bbox(base_bbox);
-       	if (PAMR_get_max_lev(PAMR_AMRH)>1) PAMR_get_dxdt(2,dx0,&dt); else PAMR_get_dxdt(1,dx0,&dt);
-       	dx_Lc=dx0[0];
-       	dy_Lc=dx0[1];
+      first=0; 
+      set_gfns();
+      PAMR_get_global_bbox(base_bbox);
+      if (PAMR_get_max_lev(PAMR_AMRH)>1) PAMR_get_dxdt(2,dx0,&dt); else PAMR_get_dxdt(1,dx0,&dt);
+      dx_Lc=dx0[0];
+      dy_Lc=dx0[1];
   	}	
   	PAMR_get_g_rank(&g_rank);
   	PAMR_get_g_shape(shape);
@@ -404,22 +420,60 @@ real norm_l2(real *f, real *cmask, real *chr)
    return (sqrt(norm/sum));
 }
 
-void print_id_info(real AdS_L, real ief_bh_r0, real ex_rbuf)
+void print_background_info(real AdS_L, real ief_bh_r0)
 {
-   real rh,M0,rhoh;
+   real rh,M0,rhoh,yh;
 
    rh=-pow(AdS_L,2)
             /(pow(3,(1.0/3.0)))
             /(pow((9*pow(AdS_L,2)*(ief_bh_r0/2)+sqrt(3.0)*sqrt(pow(AdS_L,6)+27*pow(AdS_L,4)*pow((ief_bh_r0/2),2))),(1.0/3.0)))
             +(pow((9*pow(AdS_L,2)*(ief_bh_r0/2)+sqrt(3.0)*sqrt(pow(AdS_L,6)+27*pow(AdS_L,4)*pow((ief_bh_r0/2),2))),(1.0/3.0)))
             /(pow(3,(2.0/3.0)));
-   printf("\nUniform black string AdS5D initial data with Schwarzschild-AdS4D slices\n"
+   M0=ief_bh_r0/2;
+   rhoh=(-1 + sqrt(1 + pow(rh,2)))/rh;
+   yh=rhoh; //y coordinate of the horizon; recall that we set the other Cartesian coordinates on Schwarzschild spacetime to 0 in this code
+   printf("\n==============Information about background spacetime===================\n"
+          "\nUniform black string AdS5D initial data with Schwarzschild-AdS4D slices\n"
           "Schwarzschild-AdS4D parameters:\n"
           "r0/L=%lf\n"
-          "Horizon radius in Schwarzschild coordinates: rh/L=%lf, (in compactified (code) coords rhoh=%lf )\n" 
-          "Mass M0 = r0/2 = rh*(1+rh^2/L^2)/2 = %lf\n"
-          "Excision buffer (i.e. size of the evolved region within the horizon) ex_rbuf=%lf\n\n"
-          ,ief_bh_r0/AdS_L,rh/AdS_L,rhoh,M0,ex_rbuf);
+          "Mass parameter M0 = r0/2 = rh*(1+rh^2/L^2)/2 = %lf\n"
+          "Horizon radius in uncompactified Schwarzschild coordinates: rh/L=%lf\n"
+          "Horizon radius in compactified Schwarzschild coordinates: rhoh=yh=%lf )\n\n" 
+          ,ief_bh_r0/AdS_L,M0,rh/AdS_L,yh);
+}
+
+real set_excision_radius(real AdS_L, real ief_bh_r0, real ex_ybuf)
+{
+   real rh,M0,rhoh,yh,ex_y;
+
+   rh=-pow(AdS_L,2)
+            /(pow(3,(1.0/3.0)))
+            /(pow((9*pow(AdS_L,2)*(ief_bh_r0/2)+sqrt(3.0)*sqrt(pow(AdS_L,6)+27*pow(AdS_L,4)*pow((ief_bh_r0/2),2))),(1.0/3.0)))
+            +(pow((9*pow(AdS_L,2)*(ief_bh_r0/2)+sqrt(3.0)*sqrt(pow(AdS_L,6)+27*pow(AdS_L,4)*pow((ief_bh_r0/2),2))),(1.0/3.0)))
+            /(pow(3,(2.0/3.0)));
+   M0=ief_bh_r0/2;
+   rhoh=(-1 + sqrt(1 + pow(rh,2)))/rh;
+   yh=rhoh; //y coordinate of the horizon; recall that we set the other Cartesian coordinates on Schwarzschild spacetime to 0 in this code
+   ex_y=yh*(1-ex_ybuf);
+
+   return ex_y;
+}
+
+void print_excision_info(real ex_yc, real ex_ybuf, real ex_y)
+{
+   printf("\n==============Information about excision===================\n"
+          "Cylindrical excision along x inside the black string horizon\n"
+          "Excision center is at yc=%lf\n"
+          "Excision buffer (i.e. size of the evolved region within the horizon) is ex_ybuf=%lf\n\n"
+          ,ex_yc,ex_ybuf);
+   printf("The apparent horizon finder is not implemented yet, so we use fixed excision inside the background black string horizon\n"
+          "The excision surface is at the y-coordinate value ex_y=%lf\n\n",ex_y);
+}
+
+// to be callable from fortran
+void check_nan_(real *x, int *is_nan)
+{
+    if (isnan(*x)) *is_nan=1; else *is_nan=0;
 }
 
 //=============================================================================
@@ -456,22 +510,29 @@ void UniBSAdS5D_var_post_init(char *pfile)
    {
       printf("===================================================================\n");
       printf("Reading UniBSAdS5D parameters:\n\n");
-      fflush(stdout);
    }
 
-   //read background parameters
+//=============================================================================
+// Read background parameters
+//=============================================================================
+
+   unibs_background=1; AMRD_int_param(pfile,"unibs_background",&unibs_background,1);
+   if (unibs_background==2) AMRD_stop("Schwarzschild slices in Gullstrand-Painleve coords not yet implemented\n","");
    AdS_L=1.0; AMRD_real_param(pfile,"AdS_L",&AdS_L,1);
    ief_bh_r0=0.0; AMRD_real_param(pfile,"ief_bh_r0",&ief_bh_r0,1);
 
- 	//read excision parameters
-   ex_reset_rbuf=0; AMRD_int_param(pfile,"ex_reset_rbuf",&ex_reset_rbuf,1);
-   if (!AMRD_cp_restart || ex_reset_rbuf)
+//=============================================================================
+// Read excision parameters
+//=============================================================================
+
+   ex_reset_ybuf=0; AMRD_int_param(pfile,"ex_reset_ybuf",&ex_reset_ybuf,1);
+   if (!AMRD_cp_restart || ex_reset_ybuf)
    {
-   	AMRD_real_param(pfile,"ex_rbuf",&ex_rbuf,1);
-   	if (ex_rbuf<0 || ex_rbuf>1 ) printf("WARNING ... ex_rbuf=%lf is outside of standard range\n",ex_rbuf);
+   	AMRD_real_param(pfile,"ex_ybuf",&ex_ybuf,1);
+   	if (ex_ybuf<0 || ex_ybuf>1 ) printf("WARNING ... ex_ybuf=%lf is outside of standard range\n",ex_ybuf);
    }
 
-   //initialise y-coordinate of the centre of excised region
+   // initialise y-coordinate of the centre of excised region
    // and coordinate-distance of excision boundary from centre of excised region
    if (!AMRD_cp_restart)
    {
@@ -479,7 +540,48 @@ void UniBSAdS5D_var_post_init(char *pfile)
       ex_y=0;
    }
 
-   if (my_rank==0) print_id_info(AdS_L,ief_bh_r0,ex_rbuf);
+//=============================================================================
+// Read enable/disable parameters
+//=============================================================================
+
+   background=0; AMRD_int_param(pfile,"background",&background,1);
+
+//=============================================================================
+// Read gauge parameters
+//=============================================================================
+   gauge_t=0; AMRD_int_param(pfile,"gauge_t",&gauge_t,1);
+   x1_t=0; AMRD_real_param(pfile,"x1_t",&x1_t,1);
+   x2_t=0; AMRD_real_param(pfile,"x2_t",&x2_t,1);
+   x3_t=0; AMRD_real_param(pfile,"x3_t",&x3_t,1);
+   x4_t=0; AMRD_real_param(pfile,"x4_t",&x4_t,1);
+   y3_t=0; AMRD_real_param(pfile,"y3_t",&x3_t,1);
+   y4_t=0; AMRD_real_param(pfile,"y4_t",&x4_t,1);
+   xi1_t=0; AMRD_real_param(pfile,"xi1_t",&xi1_t,1);
+   xi2_t=0; AMRD_real_param(pfile,"xi2_t",&xi2_t,1);
+   cbulk_t=0; AMRD_real_param(pfile,"cbulk_t",&cbulk_t,1);
+   gauge_i=0; AMRD_int_param(pfile,"gauge_i",&gauge_t,1);
+   x1_i=0; AMRD_real_param(pfile,"x1_i",&x1_i,1);
+   x2_i=0; AMRD_real_param(pfile,"x2_i",&x2_i,1);
+   x3_i=0; AMRD_real_param(pfile,"x3_i",&x3_i,1);
+   x4_i=0; AMRD_real_param(pfile,"x4_i",&x4_i,1);
+   y3_i=0; AMRD_real_param(pfile,"y3_i",&x3_i,1);
+   y4_i=0; AMRD_real_param(pfile,"y4_i",&x4_i,1);
+   xi1_i=0; AMRD_real_param(pfile,"xi1_i",&xi1_i,1);
+   xi2_i=0; AMRD_real_param(pfile,"xi2_i",&xi2_i,1);
+   cbulk_i=0; AMRD_real_param(pfile,"cbulk_i",&cbulk_i,1);
+
+//=============================================================================
+// Print info
+//=============================================================================
+   if (my_rank==0) print_background_info(AdS_L,ief_bh_r0);
+
+//=============================================================================
+// Apply excision
+//=============================================================================
+   if (AMRD_do_ex==0) AMRD_stop("require excision to be on","");
+   ex_y=set_excision_radius(AdS_L,ief_bh_r0,ex_ybuf);
+   if (my_rank==0) print_excision_info(ex_yc,ex_ybuf,ex_y);
+   PAMR_excision_on("chr",&UniBSAdS5D_fill_ex_mask,AMRD_ex,1);
 
    if (my_rank==0) printf("===================================================================\n");
    return;
@@ -491,6 +593,14 @@ void UniBSAdS5D_var_post_init(char *pfile)
 //=============================================================================
 void UniBSAdS5D_AMRH_var_clear(void)
 {
+
+   ldptr();
+   init_gbhb_(gb_tt_n,gb_tx_n,gb_ty_n,
+              gb_xx_n,gb_xy_n,gb_yy_n,
+              gb_zz_n,
+              Hb_t_n,Hb_x_n,Hb_y_n,
+              &AdS_L,x,y,chr,&AMRD_ex,&Nx,&Ny);
+
 	return;
 }
 
@@ -499,8 +609,10 @@ void UniBSAdS5D_AMRH_var_clear(void)
 // t0_cnst_data
 //=============================================================================
 void UniBSAdS5D_free_data(void)
-{ 
-    return;
+{
+   //specify initial values of gb's. 
+   //These are "free" since we are not solving the constraints of GR for now.
+   return;
 }
 
 //=============================================================================
@@ -514,15 +626,6 @@ void UniBSAdS5D_elliptic_vars_t0_init(void)
 
 //=============================================================================
 // Initial constraint data --- called after each MG iteration.
-//
-// Here we also initialize past time level information if 
-// AMRD_id_pl_method==3
-//
-// NOTE: not cleaning up memory allocation after reading in square black hole 
-//       data
-//
-// NOTE: np1,n,nm1 variables are allocated only at the top level of the MG hierarchy,
-//       so do an if(f_nm1){...}, for example, to make sure we are at the top level
 //=============================================================================
 void UniBSAdS5D_t0_cnst_data(void)
 {
@@ -544,9 +647,33 @@ void UniBSAdS5D_pre_io_calc(void)
 // Returns some norm of the residual for the evolution variables ... just
 // use the value from the most recent evolution step
 //=============================================================================
+#define LIN_ZERO_BND 1
+int lin_zero_bnd_all=1;
 real UniBSAdS5D_evo_residual(void)
 {
    real l2norm=0,l2norm_gb,l2norm_hb_t,l2norm_hb_i;
+   int is_nan;
+
+   ldptr();    
+   if (LIN_ZERO_BND) 
+   {
+      lin_zero_bnd_res_(gb_res,phys_bdy,&lin_zero_bnd_all,&Nx,&Ny,&app_dim);
+      lin_zero_bnd_res_(hb_t_res,phys_bdy,&lin_zero_bnd_all,&Nx,&Ny,&app_dim);
+      lin_zero_bnd_res_(hb_i_res,phys_bdy,&lin_zero_bnd_all,&Nx,&Ny,&app_dim);
+   }
+   l2norm_gb=norm_l2(gb_res,mask,chr);
+   l2norm_hb_t=norm_l2(hb_t_res,mask,chr);
+   l2norm_hb_i=norm_l2(hb_i_res,mask,chr);
+   if (!background) l2norm+=(l2norm_gb+l2norm_hb_t+l2norm_hb_i);
+   check_nan_(&l2norm,&is_nan);    
+   if (is_nan)
+   {
+      printf("\nl2norm_gb=%lf, l2norm_hb_t=%lf, l2norm_hb_i=%lf\n",
+                l2norm_gb,l2norm_hb_t,l2norm_hb_i);
+      printf("[Nx,Ny]=[%i,%i],L=%i\n",Nx,Ny,g_L);
+      AMRD_stop("l2norm is nan ... stopping","");
+      l2norm=0;
+   }
 
    return l2norm;
 }
@@ -558,13 +685,75 @@ real UniBSAdS5D_evo_residual(void)
 //=============================================================================
 void UniBSAdS5D_evolve(int iter)
 {
+   int ltrace=0;
+   real ct;
+
+   ldptr();    
+   ct=PAMR_get_time(g_L);  
+   if (ltrace) printf("UniBSAdS5D_evolve: iter=%i , time=%lf, lev=%i, rank=%i\n",iter,ct,g_L,my_rank); 
+
+   if (!background)
+   {
+      hb_t_evo_(hb_t_res,
+                gb_tt_np1,gb_tt_n,gb_tt_nm1,
+                gb_tx_np1,gb_tx_n,gb_tx_nm1,
+                gb_ty_np1,gb_ty_n,gb_ty_nm1,
+                gb_xx_np1,gb_xx_n,gb_xx_nm1,
+                gb_xy_np1,gb_xy_n,gb_xy_nm1,
+                gb_yy_np1,gb_yy_n,gb_yy_nm1,
+                gb_zz_np1,gb_zz_n,gb_zz_nm1,
+                Hb_t_np1,Hb_t_n,Hb_t_nm1,
+                Hb_x_np1,Hb_x_n,Hb_x_nm1,
+                Hb_y_np1,Hb_y_n,Hb_y_nm1,
+                &AdS_L,x,y,&dt,chr,&AMRD_ex,
+                phys_bdy,ghost_width,&Nx,&Ny,&app_dim,
+                Hb_t_0,Hb_x_0,Hb_y_0,
+                &gauge_t,&ct,
+                &x1_t,&x2_t,&x3_t,&x4_t,&y3_t,&y4_t,&xi1_t,&xi2_t,
+                &cbulk_t,&unibs_background);  
+      hb_i_evo_(hb_i_res,
+                gb_tt_np1,gb_tt_n,gb_tt_nm1,
+                gb_tx_np1,gb_tx_n,gb_tx_nm1,
+                gb_ty_np1,gb_ty_n,gb_ty_nm1,
+                gb_xx_np1,gb_xx_n,gb_xx_nm1,
+                gb_xy_np1,gb_xy_n,gb_xy_nm1,
+                gb_yy_np1,gb_yy_n,gb_yy_nm1,
+                gb_zz_np1,gb_zz_n,gb_zz_nm1,
+                Hb_t_np1,Hb_t_n,Hb_t_nm1,
+                Hb_x_np1,Hb_x_n,Hb_x_nm1,
+                Hb_y_np1,Hb_y_n,Hb_y_nm1,
+                &AdS_L,x,y,&dt,chr,&AMRD_ex,
+                phys_bdy,ghost_width,&Nx,&Ny,&app_dim,
+                Hb_t_0,Hb_x_0,Hb_y_0,
+                &gauge_i,&ct,
+                &x1_i,&x2_i,&x3_i,&x4_i,&y3_i,&y4_i,&xi1_i,&xi2_i,
+                &cbulk_i,&unibs_background);
+//      g_evo_opt_(gb_res,phi1_res,cl_res,
+//                 gb_tt_np1,gb_tt_n,gb_tt_nm1,
+//                 gb_tx_np1,gb_tx_n,gb_tx_nm1,
+//                 gb_ty_np1,gb_ty_n,gb_ty_nm1,
+//                 gb_xx_np1,gb_xx_n,gb_xx_nm1,
+//                 gb_xy_np1,gb_xy_n,gb_xy_nm1,     
+//                 gb_yy_np1,gb_yy_n,gb_yy_nm1,
+//                 gb_zz_np1,gb_zz_n,gb_zz_nm1,
+//                 Hb_t_np1,Hb_t_n,Hb_t_nm1,
+//                 Hb_x_np1,Hb_x_n,Hb_x_nm1,
+//                 Hb_y_np1,Hb_y_n,Hb_y_nm1,
+//                 &AdS_L,x,y,&dt,chr,&AMRD_ex,
+//                 phys_bdy,ghost_width,&Nx,&Ny,&app_dim,
+//                 &background,&kappa_cd,&rho_cd,
+//                 &interptype,&i_shift,&regtype,
+//                 &diss_kmax,tfunction,
+//                 &ief_bh_r0,&a_rot0,&unibs_background);
+   }
+
 	return;
 }
 
 //=============================================================================
 // sets excision mask (NO ITERATOR, SO DON'T LOAD POINTERS!!!)
-// for excised region following the shape of the AH at each value of chi and phi
-// outside rho=1 grid is also excised
+// when using a radial coordinate for the code,
+// the only excised region is that inside the horizon
 //=============================================================================
 void UniBSAdS5D_fill_ex_mask(real *mask, int dim, int *shape, real *bbox, real excised)
 {
@@ -581,21 +770,13 @@ void UniBSAdS5D_fill_ex_mask(real *mask, int dim, int *shape, real *bbox, real e
       {
          y=bbox[2]+j*dy;
          ind=i+shape[0]*j;  
-         if (x>=(1-dx_Lc/2)) 
-         {
-            //excise outside rho>=1-dx
-            mask[ind]=excised;
-         }
-         else
-         {
-         	mask[ind]=excised-1;
+         mask[ind]=excised-1;
 
-         	yp=y-ex_yc;
-         	if (yp<ex_y)
-            {
-               mask[ind]=excised;
-	         }
-         }
+         yp=y-ex_yc;
+         if (yp<ex_y)
+         {
+            mask[ind]=excised;
+	      }
       }
    }
 }

@@ -1,43 +1,31 @@
 c----------------------------------------------------------------------
-c in cartesian coordinates t,x,y,z for x,y,z in [-1,1]
-c
-c An experimental evolution routine for the gb,phi1, computing
+c An experimental evolution routine for the gb's, computing
 c the residual at the time just prior to updated
-c
-c choosing theta=pi/2
-c
-c L below is the AdS length scale
 c----------------------------------------------------------------------
-        subroutine g_evo_opt(gb_res,kg_res,cl_res,
+        subroutine g_evo_opt(gb_res,cl_res,
      &                       gb_tt_np1,gb_tt_n,gb_tt_nm1,
      &                       gb_tx_np1,gb_tx_n,gb_tx_nm1,
      &                       gb_ty_np1,gb_ty_n,gb_ty_nm1,
      &                       gb_tz_np1,gb_tz_n,gb_tz_nm1,
-     &                       gb_xx_np1,gb_xx_n,gb_xx_nm1,
      &                       gb_xy_np1,gb_xy_n,gb_xy_nm1,     
-     &                       gb_xz_np1,gb_xz_n,gb_xz_nm1,
      &                       gb_yy_np1,gb_yy_n,gb_yy_nm1,
-     &                       gb_yz_np1,gb_yz_n,gb_yz_nm1,
      &                       gb_zz_np1,gb_zz_n,gb_zz_nm1,
      &                       Hb_t_np1,Hb_t_n,Hb_t_nm1,
      &                       Hb_x_np1,Hb_x_n,Hb_x_nm1,
      &                       Hb_y_np1,Hb_y_n,Hb_y_nm1,
-     &                       Hb_z_np1,Hb_z_n,Hb_z_nm1,
-     &                       phi1_np1,phi1_n,phi1_nm1,
-     &                       L,x,y,z,dt,chr,ex,
-     &                       phys_bdy,ghost_width,Nx,Ny,Nz,
+     &                       L,x,y,dt,chr,ex,
+     &                       phys_bdy,ghost_width,Nx,Ny,
      &                       background,kappa_cd,rho_cd,
      &                       interptype,i_shift,regtype,
      &                       diss_kmax,tfunction,
-     &                       ief_bh_r0,a_rot,kerrads_background)
+     &                       ief_bh_r0,unibs_background)
         implicit none
-        real*8 ief_bh_r0,a_rot
-        integer kerrads_background
+        real*8 ief_bh_r0
+        integer unibs_background
         logical calc_der,calc_adv_quant
-        data calc_der/.true./
         data calc_adv_quant/.false./
-        integer Nx,Ny,Nz
-        integer phys_bdy(6),ghost_width(6)
+        integer Nx,Ny
+        integer phys_bdy(2*app_dim),ghost_width(2*app_dim)
         integer background
         integer interptype
         integer regtype
@@ -45,48 +33,30 @@ c----------------------------------------------------------------------
         integer diss_kmax
         integer max_ghost_width
         real*8 kappa_cd,rho_cd
-        real*8 gb_res(Nx,Ny,Nz),kg_res(Nx,Ny,Nz),cl_res(Nx,Ny,Nz)
-        real*8 gb_tt_np1(Nx,Ny,Nz),gb_tx_np1(Nx,Ny,Nz)
-        real*8 gb_ty_np1(Nx,Ny,Nz)
-        real*8 gb_tz_np1(Nx,Ny,Nz)
-        real*8 gb_xx_np1(Nx,Ny,Nz),gb_xy_np1(Nx,Ny,Nz)
-        real*8 gb_xz_np1(Nx,Ny,Nz)
-        real*8 gb_yz_np1(Nx,Ny,Nz)
-        real*8 gb_yy_np1(Nx,Ny,Nz),gb_zz_np1(Nx,Ny,Nz)
-        real*8 gb_tt_n(Nx,Ny,Nz),gb_tx_n(Nx,Ny,Nz)
-        real*8 gb_ty_n(Nx,Ny,Nz)
-        real*8 gb_tz_n(Nx,Ny,Nz)
-        real*8 gb_xx_n(Nx,Ny,Nz),gb_xy_n(Nx,Ny,Nz)
-        real*8 gb_xz_n(Nx,Ny,Nz)
-        real*8 gb_yz_n(Nx,Ny,Nz)
-        real*8 gb_yy_n(Nx,Ny,Nz),gb_zz_n(Nx,Ny,Nz)
-        real*8 gb_tt_nm1(Nx,Ny,Nz),gb_tx_nm1(Nx,Ny,Nz)
-        real*8 gb_ty_nm1(Nx,Ny,Nz)
-        real*8 gb_tz_nm1(Nx,Ny,Nz)
-        real*8 gb_xx_nm1(Nx,Ny,Nz),gb_xy_nm1(Nx,Ny,Nz)
-        real*8 gb_xz_nm1(Nx,Ny,Nz)
-        real*8 gb_yz_nm1(Nx,Ny,Nz)
-        real*8 gb_yy_nm1(Nx,Ny,Nz),gb_zz_nm1(Nx,Ny,Nz)
-        real*8 Hb_t_n(Nx,Ny,Nz),Hb_x_n(Nx,Ny,Nz)
-        real*8 Hb_y_n(Nx,Ny,Nz),Hb_z_n(Nx,Ny,Nz)
-        real*8 Hb_t_np1(Nx,Ny,Nz),Hb_x_np1(Nx,Ny,Nz)
-        real*8 Hb_y_np1(Nx,Ny,Nz),Hb_z_np1(Nx,Ny,Nz)
-        real*8 Hb_t_nm1(Nx,Ny,Nz),Hb_x_nm1(Nx,Ny,Nz)
-        real*8 Hb_y_nm1(Nx,Ny,Nz),Hb_z_nm1(Nx,Ny,Nz)
-        real*8 phi1_np1(Nx,Ny,Nz),phi1_n(Nx,Ny,Nz),phi1_nm1(Nx,Ny,Nz)
-        real*8 tfunction(Nx,Ny,Nz)
+        real*8 gb_res(Nx,Ny),cl_res(Nx,Ny)
+        real*8 gb_tt_np1(Nx,Ny),gb_tx_np1(Nx,Ny),gb_ty_np1(Nx,Ny)
+        real*8 gb_xx_np1(Nx,Ny),gb_xy_np1(Nx,Ny),gb_yy_np1(Nx,Ny)
+        real*8 gb_zz_np1(Nx,Ny)
+        real*8 gb_tt_n(Nx,Ny),gb_tx_n(Nx,Ny),gb_ty_n(Nx,Ny)
+        real*8 gb_xx_n(Nx,Ny),gb_xy_n(Nx,Ny),gb_yy_n(Nx,Ny)
+        real*8 gb_zz_n(Nx,Ny)
+        real*8 gb_tt_nm1(Nx,Ny),gb_tx_nm1(Nx,Ny),gb_ty_nm1(Nx,Ny)
+        real*8 gb_xx_nm1(Nx,Ny),gb_xy_nm1(Nx,Ny),gb_yy_nm1(Nx,Ny)
+        real*8 gb_zz_nm1(Nx,Ny)
+        real*8 Hb_t_n(Nx,Ny),Hb_x_n(Nx,Ny),Hb_y_n(Nx,Ny)
+        real*8 Hb_t_np1(Nx,Ny),Hb_x_np1(Nx,Ny),Hb_y_np1(Nx,Ny)
+        real*8 Hb_t_nm1(Nx,Ny),Hb_x_nm1(Nx,Ny),Hb_y_nm1(Nx,Ny)
+        real*8 tfunction(Nx,Ny)
         real*8 L
-        real*8 x(Nx),y(Ny),z(Nz),dt,chr(Nx,Ny,Nz),ex
-        real*8 chr2(Nx,Ny,Nz)
+        real*8 x(Nx),y(Ny),dt,chr(Nx,Ny),ex
+        real*8 chr2(Nx,Ny)
 
         integer a,b,c,d,e
         integer rb,i,j,k,m
-        integer is,ie,js,je,ks,ke,is_a_nan
+        integer is,ie,js,je,is_a_nan
 
-        real*8 dx,dy,dz
-        real*8 x0,y0,z0,rho0
-
-        real*8 phi1_res,phi1_J
+        real*8 dx,dy
+        real*8 x0,y0
 
         real*8 PI
         parameter (PI=3.141592653589793d0)
@@ -496,63 +466,44 @@ c----------------------------------------------------------------------
         data phi10_xx/16*0.0/
 
         !--------------------------------------------------------------
-        if (ltrace) write(*,*) 'gb_zz_evo ... N=',Nx,Ny,Nz
+        if (ltrace) write(*,*) 'g_evo_opt ... N=',Nx,Ny
 
         dx=x(2)-x(1)
         dy=y(2)-y(1)
-        dz=z(2)-z(1)
 
         if (abs((y(2)-y(1))/dx-1).gt.1.0d-8) then
-           write(*,*) 'error ... g_evo_opt not updated for dx!=dy!=dz'
+           write(*,*) 'error ... g_evo_opt not updated for dx!=dy'
            stop
         end if
 
         ! AdS4D cosmological constant
-        !(lambda4=-(n-1)(n-2)/2/L^2) for n=4 dimensional AdS)
-        lambda4=-3/L/L
+        !(lambda5=-(D-1)(D-2)/2/L^2) for D=5 dimensional AdS)
+        lambda5=-6/L/L
 
         ! set index bounds for main loop
         is=2
         ie=Nx-1
         js=2
         je=Ny-1
-        ks=2
-        ke=Nz-1
 
         !(nearest-to-axis points are not evolved, according to regtype choice) 
-!        if (regtype.eq.7 .or. regtype.eq.6) then
-!          if (abs(y(1)).lt.dy/2) js=4
-!        else if (regtype.eq.5 .or. regtype.eq.4 .or. regtype.eq.3) then
-!          if (abs(y(1)).lt.dy/2) js=3
-!        else
-!          if (abs(y(1)).lt.dy/2) js=2
-!        endif
+        !if (regtype.eq.7 .or. regtype.eq.6) then
+        !  if (abs(y(1)).lt.dy/2) js=4
+        !else if (regtype.eq.5 .or. regtype.eq.4 .or. regtype.eq.3) then
+        !  if (abs(y(1)).lt.dy/2) js=3
+        !else
+        !  if (abs(y(1)).lt.dy/2) js=2
+        !endif
 
         ! adjust index bounds to compensate for ghost_width
         if (ghost_width(1).gt.0) is=is+ghost_width(1)-1
         if (ghost_width(2).gt.0) ie=ie-(ghost_width(2)-1)
         if (ghost_width(3).gt.0) js=js+ghost_width(3)-1
         if (ghost_width(4).gt.0) je=je-(ghost_width(4)-1)
-        if (ghost_width(5).gt.0) ks=ks+ghost_width(5)-1
-        if (ghost_width(6).gt.0) ke=ke-(ghost_width(6)-1)
-
-!        write(*,*) "Nx,Ny,Nz="
-!     &             ,Nx,Ny,Nz
-!        write(*,*) "ghost_width(1),ghost_width(2),ghost_width(3)
-!     &             ,ghost_width(4),ghost_width(5),ghost_width(6)="
-!     &             ,ghost_width(1),ghost_width(2),ghost_width(3)
-!     &             ,ghost_width(4),ghost_width(5),ghost_width(6)
-
-!       write(*,*) "is,ie,js,je,ks,ke,chr(is,js,ks-1)="
-!     &             ,is,ie,js,je,ks,ke,chr(9,9,ks-1)
-
-!        write(*,*) "2:gb_xx_n(is,js,ks)=",gb_xx_n(is,js,ks)
-!        write(*,*) "3:gb_xx_n(is,js,ks-1)=",gb_xx_n(9,9,ks-1)
 
         ! check kmax value against ghost_width
         max_ghost_width=max(ghost_width(1),ghost_width(2),
-     &                      ghost_width(3),ghost_width(4),
-     &                      ghost_width(5),ghost_width(6))
+     &                      ghost_width(3),ghost_width(4))
         if (max_ghost_width.lt.2*diss_kmax) then
           write(*,*) 'WARNING ... ghost_width < 2*diss_kmax'
           write(*,*) 'max{ghost_width}=',max_ghost_width
@@ -563,124 +514,61 @@ c----------------------------------------------------------------------
         ! zero all outer boundary points
         if (phys_bdy(1).eq.1) then 
           do j=1,Ny
-           do k=1,Nz
-            gb_tt_np1(1,j,k) = 0
-            gb_tx_np1(1,j,k) = 0
-            gb_ty_np1(1,j,k) = 0
-            gb_tz_np1(1,j,k) = 0
-            gb_xx_np1(1,j,k) = 0
-            gb_xy_np1(1,j,k) = 0
-            gb_xz_np1(1,j,k) = 0
-            gb_yy_np1(1,j,k) = 0
-            gb_yz_np1(1,j,k) = 0
-            gb_zz_np1(1,j,k) = 0
-            phi1_np1(1,j,k) = 0
-           end do
+            gb_tt_np1(1,j) = 0
+            gb_tx_np1(1,j) = 0
+            gb_ty_np1(1,j) = 0
+            gb_xx_np1(1,j) = 0
+            gb_xy_np1(1,j) = 0
+            gb_yy_np1(1,j) = 0
+            gb_zz_np1(1,j) = 0
           end do
         end if
         if (phys_bdy(2).eq.1) then 
           do j=1,Ny
-           do k=1,Nz
-            gb_tt_np1(Nx,j,k) = 0
-            gb_tx_np1(Nx,j,k) = 0
-            gb_ty_np1(Nx,j,k) = 0
-            gb_tz_np1(Nx,j,k) = 0
-            gb_xx_np1(Nx,j,k) = 0
-            gb_xy_np1(Nx,j,k) = 0
-            gb_xz_np1(Nx,j,k) = 0
-            gb_yy_np1(Nx,j,k) = 0
-            gb_yz_np1(Nx,j,k) = 0
-            gb_zz_np1(Nx,j,k) = 0
-            phi1_np1(Nx,j,k) = 0
-           end do
+            gb_tt_np1(Nx,j) = 0
+            gb_tx_np1(Nx,j) = 0
+            gb_ty_np1(Nx,j) = 0
+            gb_xx_np1(Nx,j) = 0
+            gb_xy_np1(Nx,j) = 0
+            gb_yy_np1(Nx,j) = 0
+            gb_zz_np1(Nx,j) = 0
           end do
         end if
         if (phys_bdy(3).eq.1) then
           do i=1,Nx
-           do k=1,Nz
-            gb_tt_np1(i,1,k) = 0
-            gb_tx_np1(i,1,k) = 0
-            gb_ty_np1(i,1,k) = 0
-            gb_tz_np1(i,1,k) = 0
-            gb_xx_np1(i,1,k) = 0
-            gb_xy_np1(i,1,k) = 0
-            gb_xz_np1(i,1,k) = 0
-            gb_yy_np1(i,1,k) = 0
-            gb_yz_np1(i,1,k) = 0
-            gb_zz_np1(i,1,k) = 0
-            phi1_np1(i,1,k) = 0
-           end do
+            gb_tt_np1(i,1) = 0
+            gb_tx_np1(i,1) = 0
+            gb_ty_np1(i,1) = 0
+            gb_xx_np1(i,1) = 0
+            gb_xy_np1(i,1) = 0
+            gb_yy_np1(i,1) = 0
+            gb_zz_np1(i,1) = 0
           end do
         end if
         if (phys_bdy(4).eq.1) then 
           do i=1,Nx
-           do k=1,Nz
-            gb_tt_np1(i,Ny,k) = 0
-            gb_tx_np1(i,Ny,k) = 0
-            gb_ty_np1(i,Ny,k) = 0
-            gb_tz_np1(i,Ny,k) = 0
-            gb_xx_np1(i,Ny,k) = 0
-            gb_xy_np1(i,Ny,k) = 0
-            gb_xz_np1(i,Ny,k) = 0
-            gb_yy_np1(i,Ny,k) = 0
-            gb_yz_np1(i,Ny,k) = 0
-            gb_zz_np1(i,Ny,k) = 0
-            phi1_np1(i,Ny,k) = 0
-           end do
-          end do
-        end if
-        if (phys_bdy(5).eq.1) then
-          do i=1,Nx
-           do j=1,Ny
-            gb_tt_np1(i,j,1) = 0
-            gb_tx_np1(i,j,1) = 0
-            gb_ty_np1(i,j,1) = 0
-            gb_tz_np1(i,j,1) = 0
-            gb_xx_np1(i,j,1) = 0
-            gb_xy_np1(i,j,1) = 0
-            gb_xz_np1(i,j,1) = 0
-            gb_yy_np1(i,j,1) = 0
-            gb_yz_np1(i,j,1) = 0
-            gb_zz_np1(i,j,1) = 0
-            phi1_np1(i,j,1) = 0
-           end do
-          end do
-        end if
-        if (phys_bdy(6).eq.1) then
-          do i=1,Nx
-           do j=1,Ny
-            gb_tt_np1(i,j,Nz) = 0
-            gb_tx_np1(i,j,Nz) = 0
-            gb_ty_np1(i,j,Nz) = 0
-            gb_tz_np1(i,j,Nz) = 0
-            gb_xx_np1(i,j,Nz) = 0
-            gb_xy_np1(i,j,Nz) = 0
-            gb_xz_np1(i,j,Nz) = 0
-            gb_yy_np1(i,j,Nz) = 0
-            gb_yz_np1(i,j,Nz) = 0
-            gb_zz_np1(i,j,Nz) = 0
-            phi1_np1(i,j,Nz) = 0
-           end do
+            gb_tt_np1(i,Ny) = 0
+            gb_tx_np1(i,Ny) = 0
+            gb_ty_np1(i,Ny) = 0
+            gb_xx_np1(i,Ny) = 0
+            gb_xy_np1(i,Ny) = 0
+            gb_yy_np1(i,Ny) = 0
+            gb_zz_np1(i,Ny) = 0
           end do
         end if
 
         ! define chr2
         do i=is,ie
           do j=js,je
-           do k=ks,ke
-            if ((chr(i,j,k).ne.ex).and.
-     &          (sqrt(x(i)**2+y(j)**2+z(k)**2).ge.(1.0d0-3*dx/2)).and.
-     &          ((chr(i-1,j,k).eq.ex).or.(chr(i+1,j,k).eq.ex).or.
-     &           (chr(i,j-1,k).eq.ex).or.(chr(i,j+1,k).eq.ex).or.
-     &           (chr(i,j,k-1).eq.ex).or.(chr(i,j,k+1).eq.ex))) then
+            if ((chr(i,j).ne.ex).and.
+     &          ((x(i).ge.(1.0d0-3*dx/2)).or.
+     &           (y(j).ge.(1.0d0-3*dy/2))).and.
+     &          ((chr(i-1,j).eq.ex).or.(chr(i+1,j).eq.ex).or.
+     &           (chr(i,j-1).eq.ex).or.(chr(i,j+1).eq.ex))) then
               chr2(i,j,k)=ex
-!      write(*,*) 'chr2 excised point'
-!      write(*,*) 'i,j,k,x(i),y(j),z(k),sqrt(x(i)**2+y(j)**2+z(k)**2)='
-!     &           ,i,j,k,x(i),y(j),z(k),sqrt(x(i)**2+y(j)**2+z(k)**2)
             else 
-              chr2(i,j,k)=ex-1
+              chr2(i,j)=ex-1
             end if
-           end do
           end do
         end do
 

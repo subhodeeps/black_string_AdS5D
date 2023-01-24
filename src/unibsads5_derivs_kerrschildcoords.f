@@ -59,22 +59,6 @@ c----------------------------------------------------------------------
 
         real*8 detg0_unibsads50
 
-!!!!!!!!!!DEBUG DERIVATIVE STENCILS!!!!!!!!!!!
-        real*8 testf1(Nx,Ny,Nz),testf2(Nx,Ny,Nz),testf3(Nx,Ny,Nz)
-        real*8 testf1_t,testf1_x,testf1_y,testf1_z
-        real*8 testf2_t,testf2_x,testf2_y,testf2_z
-        real*8 testf3_t,testf3_x,testf3_y,testf3_z
-        real*8 testf1_tt,testf1_tx,testf1_ty
-        real*8 testf1_xx,testf1_xy,testf1_yy
-        real*8 testf1_tz,testf1_xz,testf1_yz,testf1_zz
-        real*8 testf2_tt,testf2_tx,testf2_ty
-        real*8 testf2_xx,testf2_xy,testf2_yy
-        real*8 testf2_tz,testf2_xz,testf2_yz,testf2_zz
-        real*8 testf3_tt,testf3_tx,testf3_ty
-        real*8 testf3_xx,testf3_xy,testf3_yy
-        real*8 testf3_tz,testf3_xz,testf3_yz,testf3_zz
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 !----------------------------------------------------------------------
 
         
